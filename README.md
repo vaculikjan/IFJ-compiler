@@ -8,4 +8,4 @@ V kolaboraci s:
 
 ## Spuštění
 
-Program se vytváří z adresáře se zdrojovými kódy. Vytvořený program ```project``` překládá vstup ze *stdin*, je možné přesměrovat textový soubor pomocí ```.\project < text```. Přijatelné vstupy je možné najít v přiloženém zadání.
+Program se vytváří z adresáře se zdrojovými kódy pomocí příkazu ```make```. Vytvořený program ```project``` překládá vstup ze *stdin*, je možné přesměrovat textový soubor pomocí ```.\project < text```. Přijatelné vstupy je možné najít v přiloženém zadání.
