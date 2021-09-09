@@ -1,56 +1,89 @@
+/*
+ *
+ *  Implementace prekladace imperativniho jazyka IFJcode18
+ *
+ *
+ *
+ *  main.c
+ *
+ *
+ *  xmensi13 - Jan Mensik
+ *  xvacul30 - Jan Vaculik
+ *  xtrejt00 - Martin Trejtnar
+ *  xlesko06 - Patrik Lesko
+ *
+ *
+ */
+
+#include <stdlib.h>
 #include <stdio.h>
 #include "str.h"
-#include "stable.h"
+#include "symtable.h"
 #include "ilist.h"
-#include "scaner.h"
+#include "scanner.h"
 #include "parser.h"
 #include "interpret.h"
 
-#define FILE_ERROR 5
 
 int main(int argc, char** argv)
 {
-   FILE *f;
-   if (argc == 1)
-   {
-      printf("Neni zadan vstupni soubor\n");
-      return FILE_ERROR;
-   }
-   if ((f = fopen(argv[1], "r")) == NULL)
-   {
-      printf("Soubor se nepodarilo otevrit\n");
-      return FILE_ERROR;
-   }   
-   setSourceFile(f);
-   
-   tSymbolTable ST; 
-   tableInit(&ST); // inicializace tabulky symbolu
-  
-   tListOfInstr instrList;
-   listInit(&instrList); // inicializace seznamu instrukci
-  
-   int result;
-   result = parse(&ST, &instrList); // provedeme syntaktickou analyzu
-   
-   switch (result)
-   {
-     case LEX_ERROR:
-     case SYNTAX_ERROR:
-     case SEM_ERROR:
-       // nastala chyba v prubehu prekladu
-       tableFree(&ST);
-       listFree(&instrList);
-       fclose(f);
-       return -result;
-     break;
-     // jinak probehlo vse v poradku, muzeme provadet kod
-   } 
-   
-   // provedeme interpretaci
-   inter(&ST, &instrList);
+    if (argc != 1)
+    {
+        return INTERNAL_ERROR;
+    }
+    
+    tTableList *tableList;
+    tableList = malloc(sizeof(tTableList));
+    tSymbolTable *ST;
+    ST = malloc(sizeof(tSymbolTable));
+    tableInit(ST); // inicializace tabulky symbolu
+    string var;
+    strInit(&var);
+    
+    strAddChar(&var, 'm');
+    strAddChar(&var, 'a');
+    strAddChar(&var, 'i');
+    strAddChar(&var, 'n');
 
-   tableFree(&ST);
-   listFree(&instrList);
-   fclose(f);
-   return 0;
+    ST->key = var;
+    tableList->first = ST;
+    
+    tListOfInstr instrList;
+    listInit(&instrList); // inicializace seznamu instrukci
+    
+    int result;
+    
+    result = parse(tableList, &instrList); // provedeme syntaktickou analyzu
+
+    switch (result)
+    {
+        case LEX_ERROR:
+        case SYNTAX_ERROR:
+        case SEM_ERROR_3:
+        case SEM_ERROR_4:
+        case SEM_ERROR_5:
+        case SEM_ERROR_6:
+        case DIV_ZERO:
+        case INTERNAL_ERROR:
+        
+            tableTableFree(tableList);
+            listFree(&instrList);
+            free (tableList);
+            return result;
+            break;
+        
+        default:
+            break;
+    }
+    
+    
+    // provedeme interpretaci
+    if (result == SYNTAX_OK) {
+        inter(ST, &instrList);
+    }
+    
+    tableTableFree(tableList);
+    listFree(&instrList);
+    free (tableList);
+    return result;
 }
